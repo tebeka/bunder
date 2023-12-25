@@ -1,0 +1,6 @@
+version: v1
+thresholds:
+  - name: BenchmarkRand-12
+    threshold: 30ns
+  - name: BenchmarkRandBig-12
+    threshold: 0.112us
