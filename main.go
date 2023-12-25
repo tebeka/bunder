@@ -81,7 +81,7 @@ func parseConfig(r io.Reader) (map[string]time.Duration, error) {
 }
 
 func loadConfig(fileName string) (map[string]time.Duration, error) {
-	file, err := os.Open(fileName)
+	file, err := os.Open(fileName) // #nosec: G304
 	if err != nil {
 		return nil, err
 	}

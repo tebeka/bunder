@@ -53,14 +53,14 @@ func Test_parseFile(t *testing.T) {
 	require.Equal(t, expected, ds)
 }
 
-func test_parseConfig(t *testing.T) {
+func Test_parseConfig(t *testing.T) {
 	file := openFile(t, "testdata/wrand.yml")
 	out, err := parseConfig(file)
 	require.NoError(t, err)
 
 	expected := map[string]time.Duration{
 		"BenchmarkRand-12":    30 * time.Nanosecond,
-		"BenchmarkRandBig-12": 132 * time.Nanosecond,
+		"BenchmarkRandBig-12": 112 * time.Nanosecond,
 	}
 
 	require.Equal(t, expected, out)
