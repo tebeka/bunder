@@ -25,3 +25,9 @@ thresholds:
 ```
 
 `threshold` can be anything that [time.ParseDuration](https://pkg.go.dev/time#ParseDuration) can handle.
+
+## Installing
+
+`go install github.com/tebeka/bunder@latest`
+
+The installed file will be in `$(go env GOPATH)/bin`.
