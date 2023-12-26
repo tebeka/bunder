@@ -138,23 +138,40 @@ Checks that benchmark results are below thresholds.
 
 `
 
+var (
+	version = "0.1.1"
+	opts    struct {
+		cfgFile     string
+		showVersion bool
+	}
+)
+
+func exeName() string {
+	return path.Base(os.Args[0])
+}
+
 func main() {
-	cfgFile := ".bunder.yml"
-	flag.StringVar(&cfgFile, "config", cfgFile, "config file name")
+	flag.StringVar(&opts.cfgFile, "config", ".bunder.yml", "config file name")
+	flag.BoolVar(&opts.showVersion, "version", false, "show version and exit")
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, usage, path.Base(os.Args[0]))
+		fmt.Fprintf(os.Stderr, usage, exeName())
 		flag.PrintDefaults()
 	}
 	flag.Parse()
+
+	if opts.showVersion {
+		fmt.Printf("%s version %s\n", exeName(), version)
+		os.Exit(0)
+	}
 
 	if flag.NArg() > 1 {
 		fmt.Fprintf(os.Stderr, "error: wrong number of arguments\n")
 		os.Exit(1)
 	}
 
-	thresholds, err := loadConfig(cfgFile)
+	thresholds, err := loadConfig(opts.cfgFile)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %q: can't load config - %s\n", cfgFile, err)
+		fmt.Fprintf(os.Stderr, "error: %q: can't load config - %s\n", opts.cfgFile, err)
 		os.Exit(1)
 	}
 
