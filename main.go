@@ -139,7 +139,7 @@ Checks that benchmark results are below thresholds.
 `
 
 var (
-	version = "0.1.1"
+	version = "0.1.2"
 	opts    struct {
 		cfgFile     string
 		showVersion bool
