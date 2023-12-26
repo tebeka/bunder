@@ -2,6 +2,8 @@ package main
 
 import (
 	"os"
+	"os/exec"
+	"path"
 	"testing"
 	"time"
 
@@ -64,4 +66,49 @@ func Test_parseConfig(t *testing.T) {
 	}
 
 	require.Equal(t, expected, out)
+}
+
+func build(t *testing.T) string {
+	exe := path.Join(t.TempDir(), "bunder")
+	err := exec.Command("go", "build", "-o", exe).Run()
+	require.NoError(t, err, "build")
+
+	return exe
+}
+
+func TestExe(t *testing.T) {
+	exe := build(t)
+	cmd := exec.Command(exe, "-config", "testdata/wrand.yml", "testdata/wrand.txt")
+	out, err := cmd.CombinedOutput()
+	require.NoError(t, err, "run")
+
+	text := string(out)
+	require.Contains(t, text, "BenchmarkRandBig-12")
+	require.NotContains(t, "text", "BenchmarkRand-12")
+}
+
+func TestExeStdin(t *testing.T) {
+	exe := build(t)
+	file, err := os.Open("testdata/wrand.txt")
+	require.NoError(t, err, "open")
+	defer file.Close()
+	cmd := exec.Command(exe, "-config", "testdata/wrand.yml")
+	cmd.Stdin = file
+
+	out, err := cmd.CombinedOutput()
+	require.NoError(t, err, "run")
+
+	text := string(out)
+	require.Contains(t, text, "BenchmarkRandBig-12")
+	require.NotContains(t, "text", "BenchmarkRand-12")
+}
+
+func TestExeHelp(t *testing.T) {
+	exe := build(t)
+	cmd := exec.Command(exe, "-h")
+	out, err := cmd.CombinedOutput()
+	require.NoError(t, err, "run")
+
+	text := string(out)
+	require.Contains(t, text, "usage")
 }
