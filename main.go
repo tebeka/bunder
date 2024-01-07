@@ -125,7 +125,7 @@ Checks that benchmark results are below thresholds.
 `
 
 var (
-	version = "0.1.2"
+	version = "0.2.0"
 	opts    struct {
 		cfgFile     string
 		showVersion bool
