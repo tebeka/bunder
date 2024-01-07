@@ -27,7 +27,7 @@ func percentile(p int, values []float64) float64 {
 	v := float64(p) / 100
 	i := int(math.Floor(float64(len(vs)) * v))
 
-	if len(vs)%1 == 0 {
+	if len(vs)%2 == 1 {
 		return vs[i]
 	}
 
