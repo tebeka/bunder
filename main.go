@@ -92,25 +92,11 @@ func loadConfig(fileName string) (map[string]time.Duration, error) {
 
 type Benchmark struct {
 	Name      string
-	Avg       float64
+	Agg       float64
 	Threshold time.Duration
 }
 
-func avg(values []float64) float64 {
-	// values can't be empty
-	if len(values) == 0 {
-		panic("avg: empty values")
-	}
-
-	total := 0.0
-	for _, v := range values {
-		total += v
-	}
-
-	return total / float64(len(values))
-}
-
-func findOffending(benches map[string][]float64, thresholds map[string]time.Duration) []Benchmark {
+func findOffending(agg AggFn, benches map[string][]float64, thresholds map[string]time.Duration) []Benchmark {
 	var bad []Benchmark
 
 	for name, durations := range benches {
@@ -119,11 +105,11 @@ func findOffending(benches map[string][]float64, thresholds map[string]time.Dura
 			continue
 		}
 
-		ba := avg(durations)
+		ba := agg(durations)
 		if time.Duration(ba) > t {
 			b := Benchmark{
 				Name:      name,
-				Avg:       ba,
+				Agg:       ba,
 				Threshold: t,
 			}
 			bad = append(bad, b)
@@ -143,6 +129,7 @@ var (
 	opts    struct {
 		cfgFile     string
 		showVersion bool
+		agg         string
 	}
 )
 
@@ -152,6 +139,7 @@ func exeName() string {
 
 func main() {
 	flag.StringVar(&opts.cfgFile, "config", ".bunder.yml", "config file name")
+	flag.StringVar(&opts.agg, "agg", "avg", "aggregation function ('avg', 'min', 'max', 'p50', 'p99', ...)")
 	flag.BoolVar(&opts.showVersion, "version", false, "show version and exit")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, usage, exeName())
@@ -166,6 +154,12 @@ func main() {
 
 	if flag.NArg() > 1 {
 		fmt.Fprintf(os.Stderr, "error: wrong number of arguments\n")
+		os.Exit(1)
+	}
+
+	agg, err := aggByName(opts.agg)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -194,12 +188,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	bad := findOffending(benches, thresholds)
+	bad := findOffending(agg, benches, thresholds)
 	if len(bad) == 0 {
 		os.Exit(0)
 	}
 
 	for _, b := range bad {
-		fmt.Printf("%s: avg = %.2f ns, threshold = %v\n", b.Name, b.Avg, b.Threshold)
+		fmt.Printf("%s: %s = %.2f ns, threshold = %v\n", opts.agg, b.Name, b.Agg, b.Threshold)
 	}
 }
