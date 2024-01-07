@@ -21,8 +21,10 @@ ci: install-tools test
 
 release-patch:
 	git tag $(shell svu patch)
+	git push
 	git push --tags
 
 release-minor:
 	git tag $(shell svu minor)
+	git push
 	git push --tags
